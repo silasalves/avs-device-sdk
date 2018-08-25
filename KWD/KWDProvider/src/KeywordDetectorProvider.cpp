@@ -1,5 +1,6 @@
 /*
  * Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Modifications copyright 2018 Silas Franco dos Reis Alves
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -11,6 +12,10 @@
  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
+ * 
+ * Modifications
+ * 
+ *     Added Porcupine engine.
  */
 
 #include "KWDProvider/KeywordDetectorProvider.h"
@@ -19,6 +24,8 @@
 #include <KittAi/KittAiKeyWordDetector.h>
 #elif KWD_SENSORY
 #include <Sensory/SensoryKeywordDetector.h>
+#elif KWD_PORCUPINE
+#include "Porcupine/PorcupineKeyWordDetector.h"
 #endif
 
 #ifdef KWD_KITTAI
@@ -60,6 +67,13 @@ std::unique_ptr<kwd::AbstractKeywordDetector> KeywordDetectorProvider::create(
         keyWordObservers,
         keyWordDetectorStateObservers,
         pathToInputFolder + "/spot-alexa-rpi-31000.snsr");
+#elif defined(KWD_PORCUPINE)
+    return alexaClientSDK::kwd::PorcupineKeyWordDetector::create(
+        stream,
+        audioFormat,
+        keyWordObservers,
+        keyWordDetectorStateObservers,
+        pathToInputFolder + "/PorcupineConfig.json");
 #else
     return nullptr;
 #endif

@@ -20,6 +20,13 @@ ENDIF()
 
 add_executable(SampleApp ${SampleApp_SOURCES})
 
+# add_library(pv_porcupine STATIC IMPORTED)
+# set_target_properties(pv_porcupine PROPERTIES
+#   IMPORTED_LOCATION "/home/silas/workspace/Porcupine/lib/linux/x86_64/libpv_porcupine.a"
+#   INTERFACE_INCLUDE_DIRECTORIES "/home/silas/workspace/Porcupine/include"
+# )
+# target_link_libraries(SampleApp pv_porcupine)
+
 target_include_directories(SampleApp PUBLIC 
     "${SampleApp_SOURCE_DIR}/include"
     "${MediaPlayer_SOURCE_DIR}/include"
@@ -27,6 +34,7 @@ target_include_directories(SampleApp PUBLIC
     "${RegistrationManager_SOURCE_DIR}/include"
     "${ESP_SOURCE_DIR}/include"
     "${PORTAUDIO_INCLUDE_DIR}")
+    # "/home/silas/workspace/Porcupine/include")
 
 target_link_libraries(SampleApp 
     DefaultClient

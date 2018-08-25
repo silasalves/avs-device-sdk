@@ -18,6 +18,10 @@
 #       -DSENSORY_KEY_WORD_DETECTOR=ON 
 #           -DSENSORY_KEY_WORD_DETECTOR_LIB_PATH=<path-to-sensory-lib>
 #           -DSENSORY_KEY_WORD_DETECTOR_INCLUDE_DIR=<path-to-sensory-include-dir>
+#       -DPORCUPINE_KEY_WORD_DETECTOR=ON
+#           -DPORCUPINE_KEY_WORD_DETECTOR_LIB_PATH=<path-to-porcupine-lib>
+#           -DPORCUPINE_KEY_WORD_DETECTOR_INCLUDE_DIR=<path-to-porcupine-include-dir>
+#           -DPORCUPINE_JSON_INCLUDE_DIR=<path-to-nlohmann-json-include-dir>
 #
 
 option(AMAZON_KEY_WORD_DETECTOR "Enable Amazon keyword detector." OFF)
@@ -25,8 +29,9 @@ option(AMAZONLITE_KEY_WORD_DETECTOR "Enable AmazonLite keyword detector." OFF)
 option(AMAZONLITE_KEY_WORD_DETECTOR_DYNAMIC_MODEL_LOADING "Enable AmazonLite keyword detector dynamic model loading." OFF)
 option(KITTAI_KEY_WORD_DETECTOR "Enable KittAi keyword detector." OFF)
 option(SENSORY_KEY_WORD_DETECTOR "Enable Sensory keyword detector." OFF)
+option(PORCUPINE_KEY_WORD_DETECTOR "Enable Porcupine keyword detector." OFF)
 
-if(NOT AMAZON_KEY_WORD_DETECTOR AND NOT AMAZONLITE_KEY_WORD_DETECTOR AND NOT KITTAI_KEY_WORD_DETECTOR AND NOT SENSORY_KEY_WORD_DETECTOR)
+if(NOT AMAZON_KEY_WORD_DETECTOR AND NOT AMAZONLITE_KEY_WORD_DETECTOR AND NOT KITTAI_KEY_WORD_DETECTOR AND NOT SENSORY_KEY_WORD_DETECTOR AND NOT PORCUPINE_KEY_WORD_DETECTOR)
     message("No keyword detector type specified, skipping build of keyword detector.")
     return()
 endif()
@@ -87,5 +92,21 @@ if(SENSORY_KEY_WORD_DETECTOR)
     endif()
     add_definitions(-DKWD)
     add_definitions(-DKWD_SENSORY)
+    set(KWD ON)
+endif()
+
+if(PORCUPINE_KEY_WORD_DETECTOR)
+    message("Creating ${PROJECT_NAME} with keyword detector type: Porcupine")
+    if(NOT PORCUPINE_KEY_WORD_DETECTOR_LIB_PATH)
+        message(FATAL_ERROR "Must pass library path of Porcupine KeywordDetector!")
+    endif()
+    if(NOT PORCUPINE_KEY_WORD_DETECTOR_INCLUDE_DIR)
+        message(FATAL_ERROR "Must pass include dir path of Porcupine KeywordDetector!")
+    endif()
+    if(NOT PORCUPINE_JSON_INCLUDE_DIR)
+        message(FATAL_ERROR "Must pass include dir path of Porcupine json library!")
+    endif()
+    add_definitions(-DKWD)
+    add_definitions(-DKWD_PORCUPINE)
     set(KWD ON)
 endif()

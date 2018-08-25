@@ -1,0 +1,6 @@
+{
+    "parameters-filepath" : "/{HOME}/sdk-folder/third-party/Porcupine/lib/common/porcupine_params.pv",
+    "keyword" : "Alexa",
+    "keyword-filepath" : "/{HOME}/sdk-folder/third-party/Porcupine/resources/keyword_files/alexa_linux.ppn",
+    "sensitivity" : 0.5
+}

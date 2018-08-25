@@ -14,5 +14,9 @@ if(KITTAI_KEY_WORD_DETECTOR)
     target_link_libraries(KeywordDetectorProvider KITTAI)
 endif()
 
+if(PORCUPINE_KEY_WORD_DETECTOR)
+    target_link_libraries(KeywordDetectorProvider PORCUPINE)
+endif()
+
 # install target
 asdk_install()

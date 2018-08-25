@@ -1,3 +1,13 @@
+### Modification Notice
+
+This repository is a fork of Amazon's [avs-device-sdk](https://github.com/alexa/avs-device-sdk) that adds support to [Porcupine](https://github.com/Picovoice/Porcupine) by [Picovoice](https://picovoice.ai). Porcupine is a self-service, highly-accurate, and lightweight wake word (voice control) engine that enables developers to build always-listening voice-enabled applications/platforms.
+
+Since the official repository [is not accepting pull requests](https://github.com/alexa/avs-device-sdk/blob/master/CONTRIBUTING.md#pull-requests), I will be hosting this fork in my personal account - at least until they start accepting pull requests.
+
+This was tested on Ubuntu 16.04.
+
+[Learn more about Porcupine »](https://picovoice.ai/#wake-word-engine)
+
 ### What is the Alexa Voice Service (AVS)?
 
 The Alexa Voice Service (AVS) enables developers to integrate Alexa directly into their products, bringing the convenience of voice control to any connected device. AVS provides developers with access to a suite of resources to quickly and easily build Alexa-enabled products, including APIs, hardware development kits, software development kits, and documentation.
@@ -8,7 +18,66 @@ The Alexa Voice Service (AVS) enables developers to integrate Alexa directly int
 
 The AVS Device SDK provides C++-based (11 or later) libraries that leverage the AVS API to create device software for Alexa-enabled products. It is modular and abstracted, providing components for handling discrete functions such as speech capture, audio processing, and communications, with each component exposing the APIs that you can use and customize for your integration. It also includes a sample app, which demonstrates the interactions with AVS.
 
+### How to build AVS Device SDK using this repository
+
+Summarizing, this project added the interface for Porcupine engine and modified the CMake files to link the required libraries. These are the dependencies:
+
+* [Porcupine](https://github.com/Picovoice/Porcupine) - the keyword detection engine.
+* [JSON for Modern C++](https://github.com/nlohmann/json) - used for reading Porcupine's configuration file.
+
+Therefore, you can follow the [official getting started guide](https://github.com/alexa/avs-device-sdk/wiki#step-by-step-guides) for [Ubuntu GNU/Linux](https://github.com/alexa/avs-device-sdk/wiki/Ubuntu-Linux-Quick-Start-Guide) or [macOS](https://github.com/alexa/avs-device-sdk/wiki/macOS-Quick-Start-Guide) with a few extra steps, which I will address in sequence.
+
+Instead of cloning the official SDK in _step 7_ of [Ubuntu's Setup](https://github.com/alexa/avs-device-sdk/wiki/Ubuntu-Linux-Quick-Start-Guide#setup) or [macOS' Clone the AVS Device SDK](https://github.com/alexa/avs-device-sdk/wiki/macOS-Quick-Start-Guide#clone-the-avs-device-sdk), clone this repository instead by running:
+
+```
+cd ~/sdk-folder/sdk-source && git clone https://github.com/silasalves/avs-device-sdk.git
+```
+
+Instead of following _step 8_ of [Ubuntu's Setup](https://github.com/alexa/avs-device-sdk/wiki/Ubuntu-Linux-Quick-Start-Guide#setup) or _step 1_ of [macOS' Build the SDK](https://github.com/alexa/avs-device-sdk/wiki/macOS-Quick-Start-Guide#build-the-sdk), use the following instructions. Go the the `third-party` folder and clone the required dependencies by using the commands:
+
+```
+cd ~/sdk-folder/third-party
+git clone https://github.com/Picovoice/Porcupine.git
+git clone https://github.com/nlohmann/json.git
+```
+
+Now you should be able to configure and compile the SDK sample application with Porcupine. To do that, you will have to setup these variables for the build configuration:
+
+* `-DPORCUPINE_KEY_WORD_DETECTOR=ON` to indicate that the Porcupine engine will be used
+* `-DPORCUPINE_KEY_WORD_DETECTOR_LIB_PATH=...` with the path to Porcupine library files.
+* `-DPORCUPINE_KEY_WORD_DETECTOR_INCLUDE_DIR=...` with the path to Porcupine include directory.
+* `-DPORCUPINE_JSON_INCLUDE_DIR=...` with the path to the _JSON for Modern C++_ include directory.
+
+Assuming that you followed the instructions before, you can run the next command to compile everything (for both Ubuntu and macOS).
+
+**IMPORTANT**: Replace _all_ instances of `{HOME}` with the absolute path to your home directory. For example: `/Users/johnsmith/` (do use `~/`):
+
+```
+cd /{HOME}/sdk-folder/sdk-build && cmake /{HOME}/sdk-folder/sdk-source/avs-device-sdk -DPORCUPINE_KEY_WORD_DETECTOR=ON -DPORCUPINE_KEY_WORD_DETECTOR_LIB_PATH=/{HOME}/sdk-folder/third-party/Porcupine/include -DPORCUPINE_KEY_WORD_DETECTOR_LIB_PATH=/{HOME}/sdk-folder/third-party/Porcupine/lib/linux/x86_64 -DPORCUPINE_JSON_INCLUDE_DIR=/{HOME}/sdk-folder/third-party/json/include  -DGSTREAMER_MEDIA_PLAYER=ON -DPORTAUDIO=ON -DPORTAUDIO_LIB_PATH=/{HOME}/sdk-folder/third-party/portaudio/lib/.libs/libportaudio.a -DPORTAUDIO_INCLUDE_DIR=/{HOME}/sdk-folder/third-party/portaudio/include && make
+```
+
+Copy `~/sdk-folder/sdk-source/avs-device-sdk/Integration/PorcupineConfig.json` to `~/sdk-folder/sdk-build/Integration` and open in your favorite text editor to replace _all_ instances of `{HOME}` with the path to your home directory.
+
+```json
+{
+  "parameters-filepath" : "/{HOME}/sdk-folder/third-party/Porcupine/lib/common/porcupine_params.pv",
+  "keyword" : "Alexa",
+  "keyword-filepath" : "/{HOME}/sdk-folder/third-party/Porcupine/resources/keyword_files/alexa_linux.ppn",
+  "sensitivity" : 0.5
+}
+```
+
+Now, continue following the official setup guide _until_ the **Run and authorize** section, because we will have to change the first step of that section by running the following command instead to start the `SampleApp`:
+
+```
+./SampleApp/src/SampleApp Integration/AlexaClientSDKConfig.json ~/sdk-folder/sdk-build/Integration
+```
+
+That is it. You can continue following the original guide to finish the setup process.
+
 ### Get Started
+
+**IMPORTANT**: Please read the previous section before reading the following guides.
 
 You can set up the SDK on the following platforms:
 * [Ubuntu Linux](https://github.com/alexa/avs-device-sdk/wiki/Ubuntu-Linux-Quick-Start-Guide)
@@ -97,6 +166,7 @@ In addition to adopting the [Security Best Practices for Alexa](https://develope
 * Please use the contact information below to-
   * [Contact Sensory](http://www.sensory.com/support/contact/us-sales/) for information on TrulyHandsFree licensing.
   * [Contact KITT.AI](mailto:snowboy@kitt.ai) for information on SnowBoy licensing.
+  * [Contact Picovoice](https://picovoice.ai/#contact) for information on Porcupine licensing.
 * **IMPORTANT**: The Sensory wake word engine referenced in this document is time-limited: code linked against it will stop working when the library expires. The library included in this repository will, at all times, have an expiration date that is at least 120 days in the future. See [Sensory's GitHub ](https://github.com/Sensory/alexa-rpi#license)page for more information.
 
 ### Release Notes and Known Issues

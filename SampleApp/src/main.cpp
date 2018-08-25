@@ -1,5 +1,6 @@
 /*
  * Copyright 2017-2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Modifications copyright 2018 Silas Franco dos Reis Alves
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -11,6 +12,10 @@
  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
+ * 
+ * Modifications
+ * 
+ *     Added Porcupine engine.
  */
 
 #include "SampleApp/SampleApplication.h"
@@ -77,7 +82,7 @@ int main(int argc, char* argv[]) {
             }
         }
     } else {
-#if defined(KWD_KITTAI) || defined(KWD_SENSORY)
+#if defined(KWD_KITTAI) || defined(KWD_SENSORY) || defined(KWD_PORCUPINE)
         if (argc < 3) {
             alexaClientSDK::sampleApp::ConsolePrinter::simplePrint(
                 "USAGE: " + std::string(argv[0]) +
