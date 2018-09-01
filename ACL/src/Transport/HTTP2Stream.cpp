@@ -26,6 +26,15 @@
 #include "ACL/Transport/HTTP2Stream.h"
 #include "ACL/Transport/HTTP2Transport.h"
 
+#define DEBUG_AUDIO
+
+#ifdef DEBUG_AUDIO
+#include <fstream>
+#include <cstdio>
+#include <sstream>
+#include <iomanip>
+#endif
+
 namespace alexaClientSDK {
 namespace acl {
 
@@ -72,6 +81,14 @@ static const std::string STREAM_IN_DUMP_SUFFIX("-in.bin");
 static const std::string STREAM_OUT_DUMP_SUFFIX("-out.bin");
 /// Maximum size for exception messages.
 static const size_t EXCEPTION_MESSAGE_MAX_SIZE = 4096;
+
+#ifdef DEBUG_AUDIO
+/// Output stream for the temporary audio files.
+static std::ofstream tmpAudioFile;
+
+/// A counter used to name the temporary audio files.
+static int tmpFileCount;
+#endif
 
 #ifdef DEBUG
 /// Carriage return
@@ -154,6 +171,18 @@ HTTP2Stream::HTTP2Stream(
         m_isPaused{false},
         m_progressTimeout{std::chrono::steady_clock::duration::max().count()},
         m_timeOfLastTransfer{getNow()} {
+
+#ifdef DEBUG_AUDIO
+    // Sets the temporary file counter to 0 and removes all the previous temporary
+    // files from /tmp/
+    tmpFileCount = 0;
+    for(int i = 0; i < 65536; i++) {
+        std::stringstream sFileName;
+        sFileName << "/tmp/avs_" << std::setw(6) << std::setfill('0') << i << ".pcm";
+        if(remove(sFileName.str().c_str()))
+            break;
+    }
+#endif
 }
 
 bool HTTP2Stream::reset() {
@@ -413,10 +442,25 @@ size_t HTTP2Stream::readCallback(char* data, size_t size, size_t nmemb, void* us
         case AttachmentReader::ReadStatus::OK:
         case AttachmentReader::ReadStatus::OK_WOULDBLOCK:
         case AttachmentReader::ReadStatus::OK_TIMEDOUT:
+#ifdef DEBUG_AUDIO
+            // Open a new temporary output file if needed, then write the audio data
+            // to it.
+            if (!tmpAudioFile.is_open()) {
+                std::stringstream sFileName;
+                sFileName << "/tmp/avs_" << std::setw(6) << std::setfill('0') << tmpFileCount << ".pcm";
+                tmpAudioFile.open(sFileName.str(), std::ios::binary);
+                tmpFileCount++;
+            }
+            tmpAudioFile.write(data, bytesRead);
+#endif
             break;
 
         // No more data to send - close the stream.
         case AttachmentReader::ReadStatus::CLOSED:
+#ifdef DEBUG_AUDIO
+            // Since there is no more data to write, close the temporary file handler
+            tmpAudioFile.close();
+#endif
             return 0;
 
         // Handle any attachment read errors.
